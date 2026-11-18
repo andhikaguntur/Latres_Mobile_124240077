@@ -1,40 +1,65 @@
-class Product {
+class Film {
   final int id;
-  final String title;
-  final String description;
-  final double price;
-  final double rating;
-  final int stock;
-  final String brand;
-  final List<dynamic> tags;
-  final List<dynamic> images;
-  final List<dynamic> reviews;
-  
-  Product({
+  final String name;
+  final List<String> genres;
+  final double? rating;
+  final String? imageUrl;
+  final String? summary;
+
+  Film({
     required this.id,
-    required this.title,
-    required this.description,
-    required this.price,
-    required this.rating,
-    required this.stock,
-    required this.brand,
-    required this.tags,
-    required this.images,
-    required this.reviews,
+    required this.name,
+    required this.genres,
+    this.rating,
+    this.imageUrl,
+    this.summary,
   });
 
-  factory Product.fromJson(Map<String, dynamic> jsonData) {
-    return Product(
-      id: jsonData['id'],
-      title: jsonData['title'] ?? '',
-      description: jsonData['description'] ?? '',
-      price: jsonData['price'] ?? '',
-      rating: jsonData['rating'] ?? '',
-      stock: jsonData['stock'] ?? '',
-      brand: jsonData['brand'] ?? '',
-      tags: jsonData['tags'] ?? [],
-      images: jsonData['images'] ?? [],
-      reviews: jsonData['reviews'] ?? [],
+  factory Film.fromJson(Map<String, dynamic> json) {
+    return Film(
+      id: json['id'] as int,
+      name: json['name'] as String? ?? 'No Title',
+      genres: (json['genres'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
+      rating: json['rating'] != null && json['rating']['average'] != null
+          ? (json['rating']['average'] as num).toDouble()
+          : null,
+      imageUrl: json['image'] != null
+          ? (json['image']['original'] ?? json['image']['medium']) as String?
+          : null,
+      summary: json['summary'] as String? ?? '',
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'genres': genres,
+      'rating': rating,
+      'imageUrl': imageUrl,
+      'summary': summary,
+    };
+  }
+
+  factory Film.fromMap(Map<dynamic, dynamic> map) {
+    return Film(
+      id: map['id'] as int,
+      name: map['name'] as String? ?? '',
+      genres: (map['genres'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
+      rating: map['rating'] != null ? (map['rating'] as num).toDouble() : null,
+      imageUrl: map['imageUrl'] as String?,
+      summary: map['summary'] as String? ?? '',
+    );
+  }
+
+  String get cleanSummary {
+    if (summary == null || summary!.isEmpty) return 'No description available.';
+    return summary!.replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '').trim();
   }
 }

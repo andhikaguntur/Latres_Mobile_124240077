@@ -1,16 +1,27 @@
 import 'dart:convert';
-
+import 'package:http/http.dart' as http;
 import '../models/film.dart';
 
-import 'package:http/http.dart' as http;
+class FilmApiService {
+  static const String _baseUrl = 'https://api.tvmaze.com';
 
-class ProductService {
-  final Uri _url = Uri.parse("https://dummyjson.com/products");
+  Future<List<Film>> fetchFilms() async {
+    final response = await http.get(Uri.parse('$_baseUrl/shows'));
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return data.map((item) => Film.fromJson(item as Map<String, dynamic>)).toList();
+    } else {
+      throw Exception('Failed to load shows from TVMaze');
+    }
+  }
 
-  Future<List<Product>> fetchProducts() async {
-    final response = await http.get(_url);
-    final result = jsonDecode(response.body);
-    final List<dynamic> products = result['products'];
-    return products.map((product) => Product.fromJson(product)).toList();
+  Future<Film> fetchFilmDetail(int id) async {
+    final response = await http.get(Uri.parse('$_baseUrl/shows/$id'));
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = jsonDecode(response.body);
+      return Film.fromJson(data);
+    } else {
+      throw Exception('Failed to load show detail');
+    }
   }
 }

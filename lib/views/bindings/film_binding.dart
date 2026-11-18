@@ -4,6 +4,6 @@ import 'package:latres/controllers/film_controller.dart';
 class FilmBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut(() => FilmController());
+    Get.lazyPut<FilmController>(() => FilmController());
   }
 }
