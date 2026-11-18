@@ -1,9 +1,11 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/data.dart';
+
+import '../models/account.dart';
 
 class LoginController {
   Future<bool> login(String username, String password) async {
-    if (username.trim() == account.username && password.trim() == account.password) {
+    if (username.trim() == account.username &&
+        password.trim() == account.password) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('is_logged_in', true);
       await prefs.setString('username', username.trim());

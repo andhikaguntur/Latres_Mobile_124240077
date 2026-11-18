@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:latres/models/film.dart';
@@ -6,25 +5,13 @@ import 'package:latres/services/film_api_service.dart';
 
 class FilmController extends GetxController {
   final FilmApiService _filmService = FilmApiService();
+  final Box _favBox = Hive.box('favorites');
 
-  // State variables for list
-  final RxBool _isLoading = false.obs;
-  final RxList<Film> _films = <Film>[].obs;
-
-  // State variables for favorites
-  final RxList<Film> _favoriteFilms = <Film>[].obs;
-
-  // State variables for detail
-  final RxBool _isDetailLoading = false.obs;
-  final Rx<Film?> _detailFilm = Rx<Film?>(null);
-
-  bool get isLoading => _isLoading.value;
-  List<Film> get films => _films;
-  List<Film> get favoriteFilms => _favoriteFilms;
-  bool get isDetailLoading => _isDetailLoading.value;
-  Film? get detailFilm => _detailFilm.value;
-
-  Box get _favBox => Hive.box('favorites');
+  // Variabel reaktif
+  final isLoading = false.obs;
+  final films = <Film>[].obs;
+  final favoriteFilms = <Film>[].obs;
+  final detailFilm = Rx<Film?>(null);
 
   @override
   void onInit() {
@@ -33,50 +20,47 @@ class FilmController extends GetxController {
     loadFavorites();
   }
 
+  // Mengambil daftar film dari API TVMaze
   Future<void> retrieveFilms() async {
     try {
-      _isLoading.value = true;
+      isLoading.value = true;
       final data = await _filmService.fetchFilms();
-      _films.assignAll(data);
+      films.assignAll(data);
     } catch (e) {
-      debugPrint('Error fetchFilms: $e');
+      // Error handling
     } finally {
-      _isLoading.value = false;
+      isLoading.value = false;
     }
   }
 
+  // Mengambil detail film dari API TVMaze berdasarkan ID
   Future<void> retrieveDetail(int id, {Film? initial}) async {
+    if (initial != null) {
+      detailFilm.value = initial;
+    }
     try {
-      if (initial != null) {
-        _detailFilm.value = initial;
-      } else {
-        _detailFilm.value = null;
-      }
-      _isDetailLoading.value = true;
       final data = await _filmService.fetchFilmDetail(id);
-      _detailFilm.value = data;
+      detailFilm.value = data;
     } catch (e) {
-      debugPrint('Error fetchDetail: $e');
-    } finally {
-      _isDetailLoading.value = false;
+      // Error handling
     }
   }
 
+  // Memuat data favorit dari Hive
   void loadFavorites() {
-    final List<Film> favs = [];
-    for (var key in _favBox.keys) {
-      final item = _favBox.get(key);
-      if (item != null) {
-        favs.add(Film.fromMap(Map<dynamic, dynamic>.from(item)));
-      }
+    final List<Film> items = [];
+    for (var value in _favBox.values) {
+      items.add(Film.fromMap(Map.from(value)));
     }
-    _favoriteFilms.assignAll(favs);
+    favoriteFilms.assignAll(items);
   }
 
+  // Cek apakah film sudah ada di favorit
   bool isFavorite(int id) {
-    return _favoriteFilms.any((film) => film.id == id);
+    return favoriteFilms.any((film) => film.id == id);
   }
 
+  // Tambah atau hapus favorit
   void toggleFavorite(Film film) {
     if (isFavorite(film.id)) {
       _favBox.delete(film.id);
@@ -86,6 +70,7 @@ class FilmController extends GetxController {
     loadFavorites();
   }
 
+  // Hapus item dari favorit
   void removeFavorite(int id) {
     _favBox.delete(id);
     loadFavorites();

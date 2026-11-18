@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:latres/controllers/film_controller.dart';
 
-class HomePage extends GetView<FilmController> {
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final FilmController controller = Get.find<FilmController>();
+
     return Scaffold(
       backgroundColor: const Color(0xFF141414),
       appBar: AppBar(
@@ -19,48 +21,31 @@ class HomePage extends GetView<FilmController> {
         automaticallyImplyLeading: false,
       ),
       body: Obx(() {
-        if (controller.isLoading) {
+        if (controller.isLoading.value) {
           return const Center(
             child: CircularProgressIndicator(color: Color(0xFFE50914)),
           );
         }
 
         if (controller.films.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  'Tidak ada film yang ditemukan.',
-                  style: TextStyle(color: Colors.grey),
-                ),
-                const SizedBox(height: 12),
-                ElevatedButton(
-                  onPressed: () => controller.retrieveFilms(),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFE50914),
-                  ),
-                  child: const Text(
-                    'Coba Lagi',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ],
+          return const Center(
+            child: Text(
+              'Tidak ada film yang ditemukan.',
+              style: TextStyle(color: Colors.grey),
             ),
           );
         }
 
         return RefreshIndicator(
           color: const Color(0xFFE50914),
-          backgroundColor: const Color(0xFF1E1E1E),
           onRefresh: () => controller.retrieveFilms(),
           child: GridView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            padding: const EdgeInsets.all(12),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               childAspectRatio: 0.65,
               crossAxisSpacing: 12,
-              mainAxisSpacing: 14,
+              mainAxisSpacing: 12,
             ),
             itemCount: controller.films.length,
             itemBuilder: (context, index) {
@@ -79,39 +64,27 @@ class HomePage extends GetView<FilmController> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Poster Image
+                      // Poster Film
                       Expanded(
                         child: film.imageUrl != null
                             ? Image.network(
                                 film.imageUrl!,
                                 width: double.infinity,
                                 fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    Container(
-                                      color: Colors.grey.shade900,
-                                      child: const Center(
-                                        child: Icon(
-                                          Icons.movie,
-                                          size: 40,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ),
+                                errorBuilder: (context, error, stackTrace) => Container(
+                                  color: Colors.grey.shade900,
+                                  child: const Icon(Icons.movie, size: 40, color: Colors.grey),
+                                ),
                               )
                             : Container(
                                 color: Colors.grey.shade900,
-                                child: const Center(
-                                  child: Icon(
-                                    Icons.movie,
-                                    size: 40,
-                                    color: Colors.grey,
-                                  ),
-                                ),
+                                child: const Icon(Icons.movie, size: 40, color: Colors.grey),
                               ),
                       ),
-                      // Title & Rating
+
+                      // Judul & Rating
                       Padding(
-                        padding: const EdgeInsets.all(10.0),
+                        padding: const EdgeInsets.all(8.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -128,20 +101,11 @@ class HomePage extends GetView<FilmController> {
                             const SizedBox(height: 4),
                             Row(
                               children: [
-                                const Icon(
-                                  Icons.star,
-                                  color: Colors.amber,
-                                  size: 14,
-                                ),
+                                const Icon(Icons.star, color: Colors.amber, size: 14),
                                 const SizedBox(width: 4),
                                 Text(
-                                  film.rating != null
-                                      ? film.rating.toString()
-                                      : '-',
-                                  style: const TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 12,
-                                  ),
+                                  film.rating != null ? film.rating.toString() : '-',
+                                  style: const TextStyle(color: Colors.grey, fontSize: 12),
                                 ),
                               ],
                             ),

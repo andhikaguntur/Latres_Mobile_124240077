@@ -15,24 +15,19 @@ class Film {
     this.summary,
   });
 
+  // Konversi dari JSON API TVMaze ke objek Film
   factory Film.fromJson(Map<String, dynamic> json) {
     return Film(
-      id: json['id'] as int,
-      name: json['name'] as String? ?? 'No Title',
-      genres: (json['genres'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          [],
-      rating: json['rating'] != null && json['rating']['average'] != null
-          ? (json['rating']['average'] as num).toDouble()
-          : null,
-      imageUrl: json['image'] != null
-          ? (json['image']['original'] ?? json['image']['medium']) as String?
-          : null,
-      summary: json['summary'] as String? ?? '',
+      id: json['id'],
+      name: json['name'] ?? '',
+      genres: List<String>.from(json['genres'] ?? []),
+      rating: json['rating']?['average']?.toDouble(),
+      imageUrl: json['image']?['medium'] ?? json['image']?['original'],
+      summary: json['summary'] ?? '',
     );
   }
 
+  // Konversi ke Map untuk disimpan di Hive
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -44,20 +39,19 @@ class Film {
     };
   }
 
-  factory Film.fromMap(Map<dynamic, dynamic> map) {
+  // Konversi dari Map di Hive ke objek Film
+  factory Film.fromMap(Map map) {
     return Film(
-      id: map['id'] as int,
-      name: map['name'] as String? ?? '',
-      genres: (map['genres'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          [],
-      rating: map['rating'] != null ? (map['rating'] as num).toDouble() : null,
-      imageUrl: map['imageUrl'] as String?,
-      summary: map['summary'] as String? ?? '',
+      id: map['id'],
+      name: map['name'] ?? '',
+      genres: List<String>.from(map['genres'] ?? []),
+      rating: map['rating']?.toDouble(),
+      imageUrl: map['imageUrl'],
+      summary: map['summary'] ?? '',
     );
   }
 
+  // Menghapus tag HTML (seperti <p>, <b>) dari summary TVMaze
   String get cleanSummary {
     if (summary == null || summary!.isEmpty) return 'No description available.';
     return summary!.replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '').trim();
