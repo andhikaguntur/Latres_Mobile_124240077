@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:latres/controllers/film_controller.dart';
 
+// =============================================================================
+// [KETENTUAN d. FAVORITE PAGE]
+// Menampilkan daftar film/show yang disukai dan disimpan secara lokal via Hive.
+// Mendukung penghapusan item dan navigasi ke halaman detail.
+// =============================================================================
+
 class FavoritePage extends StatelessWidget {
   const FavoritePage({super.key});
 
@@ -20,7 +26,11 @@ class FavoritePage extends StatelessWidget {
         elevation: 0,
         automaticallyImplyLeading: false,
       ),
+      // Obx akan merender ulang jika list favoriteFilms berubah
       body: Obx(() {
+        // ---------------------------------------------------------------------
+        // [KETENTUAN d.i] Menampilkan Pesan jika Belum Ada Film Favorit
+        // ---------------------------------------------------------------------
         if (controller.favoriteFilms.isEmpty) {
           return const Center(
             child: Text(
@@ -30,6 +40,9 @@ class FavoritePage extends StatelessWidget {
           );
         }
 
+        // ---------------------------------------------------------------------
+        // [KETENTUAN d.i & d.ii] Menampilkan Daftar Film yang Disimpan di Hive
+        // ---------------------------------------------------------------------
         return ListView.builder(
           padding: const EdgeInsets.all(12),
           itemCount: controller.favoriteFilms.length,
@@ -43,7 +56,7 @@ class FavoritePage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10),
               ),
               child: ListTile(
-                // Gambar kecil / thumbnail
+                // Gambar poster mini / thumbnail
                 leading: ClipRRect(
                   borderRadius: BorderRadius.circular(6),
                   child: film.imageUrl != null
@@ -66,14 +79,18 @@ class FavoritePage extends StatelessWidget {
                           child: const Icon(Icons.movie, color: Colors.grey),
                         ),
                 ),
-                // Judul
+                // Judul film
                 title: Text(
                   film.name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
                 ),
-                // Rating
+                // Rating film
                 subtitle: Row(
                   children: [
                     const Icon(Icons.star, color: Colors.amber, size: 14),
@@ -84,14 +101,19 @@ class FavoritePage extends StatelessWidget {
                     ),
                   ],
                 ),
-                // Tombol Hapus
+                // -------------------------------------------------------------
+                // [KETENTUAN d.iii] Tombol Hapus Film dari Favorit
+                // Menghapus data dari Hive melalui FilmController
+                // -------------------------------------------------------------
                 trailing: IconButton(
                   icon: const Icon(Icons.delete, color: Color(0xFFE50914)),
                   onPressed: () {
                     controller.removeFavorite(film.id);
                   },
                 ),
-                // Klik untuk buka detail
+                // -------------------------------------------------------------
+                // [KETENTUAN d.iv] Navigasi ke Detail Page saat Item Diklik
+                // -------------------------------------------------------------
                 onTap: () {
                   Get.toNamed('/detail', arguments: film);
                 },

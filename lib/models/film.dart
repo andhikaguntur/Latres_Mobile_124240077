@@ -1,3 +1,9 @@
+// =============================================================================
+// [MODEL DATA FILM]
+// Merepresentasikan struktur data TV Show dari API TVMaze (https://api.tvmaze.com)
+// Serta mendukung konversi Map untuk disimpan di database lokal Hive.
+// =============================================================================
+
 class Film {
   final int id;
   final String name;
@@ -15,19 +21,26 @@ class Film {
     this.summary,
   });
 
-  // Konversi dari JSON API TVMaze ke objek Film
+  // ---------------------------------------------------------------------------
+  // [KETENTUAN b.ii & c.i] Mapping data JSON dari API TVMaze ke objek Film
+  // ---------------------------------------------------------------------------
   factory Film.fromJson(Map<String, dynamic> json) {
     return Film(
       id: json['id'],
       name: json['name'] ?? '',
+      // Parsing list genre menjadi List<String>
       genres: List<String>.from(json['genres'] ?? []),
+      // Mengambil nilai rating (average), diubah menjadi tipe double jika ada
       rating: json['rating']?['average']?.toDouble(),
+      // Mengambil URL gambar berukuran medium atau original
       imageUrl: json['image']?['medium'] ?? json['image']?['original'],
       summary: json['summary'] ?? '',
     );
   }
 
-  // Konversi ke Map untuk disimpan di Hive
+  // ---------------------------------------------------------------------------
+  // [KETENTUAN d.ii] Mengubah objek Film menjadi Map untuk disimpan di Hive
+  // ---------------------------------------------------------------------------
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -39,7 +52,9 @@ class Film {
     };
   }
 
-  // Konversi dari Map di Hive ke objek Film
+  // ---------------------------------------------------------------------------
+  // [KETENTUAN d.ii] Mengubah Map dari Hive kembali menjadi objek Film
+  // ---------------------------------------------------------------------------
   factory Film.fromMap(Map map) {
     return Film(
       id: map['id'],
@@ -51,7 +66,11 @@ class Film {
     );
   }
 
-  // Menghapus tag HTML (seperti <p>, <b>) dari summary TVMaze
+  // ---------------------------------------------------------------------------
+  // [KETENTUAN c.ii.5] Helper untuk membersihkan tag HTML pada Overview
+  // API TVMaze menyertakan tag HTML seperti <p>, <b>, &amp;, dll pada summary.
+  // Getter ini menghapusnya agar teks rapi saat ditampilkan di Detail Page.
+  // ---------------------------------------------------------------------------
   String get cleanSummary {
     if (summary == null || summary!.isEmpty) return 'No description available.';
     return summary!.replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '').trim();

@@ -3,6 +3,12 @@ import 'package:get/get.dart';
 import 'package:latres/controllers/film_controller.dart';
 import 'package:latres/models/film.dart';
 
+// =============================================================================
+// [KETENTUAN c. DETAIL PAGE]
+// Menampilkan informasi detail TV Show yang diambil dari endpoint:
+// https://api.tvmaze.com/shows/{id}
+// =============================================================================
+
 class DetailPage extends StatefulWidget {
   const DetailPage({super.key});
 
@@ -17,8 +23,13 @@ class _DetailPageState extends State<DetailPage> {
   @override
   void initState() {
     super.initState();
+    // Menerima data awal film dari navigasi
     film = Get.arguments as Film;
-    // Mengambil detail show dari endpoint https://api.tvmaze.com/shows/{id}
+
+    // -------------------------------------------------------------------------
+    // [KETENTUAN c.i] Memanggil Endpoint Detail https://api.tvmaze.com/shows/{id}
+    // Mengambil data detail show paling baru berdasarkan ID film
+    // -------------------------------------------------------------------------
     controller.retrieveDetail(film.id, initial: film);
   }
 
@@ -27,24 +38,34 @@ class _DetailPageState extends State<DetailPage> {
     return Scaffold(
       backgroundColor: const Color(0xFF141414),
       appBar: AppBar(
-        title: const Text('Detail', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Detail',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
         backgroundColor: const Color(0xFF141414),
         elevation: 0,
+        // ---------------------------------------------------------------------
+        // [KETENTUAN c.iv] Navigasi Kembali ke Page Sebelumnya
+        // ---------------------------------------------------------------------
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Get.back(),
         ),
       ),
       body: Obx(() {
-        // Ambil data film (dari controller atau data awal)
+        // Menggunakan data detail dari API jika sudah tersedia, atau data awal sebagai cadangan
         final currentFilm = controller.detailFilm.value ?? film;
+
+        // Mengecek apakah film ini sudah ada di dalam database Hive favorit
         final isFav = controller.isFavorite(currentFilm.id);
 
         return SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Gambar Poster
+              // ---------------------------------------------------------------
+              // [KETENTUAN c.ii.1] Menampilkan Gambar Poster Detail
+              // ---------------------------------------------------------------
               if (currentFilm.imageUrl != null)
                 Image.network(
                   currentFilm.imageUrl!,
@@ -63,7 +84,9 @@ class _DetailPageState extends State<DetailPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Judul Film
+                    // ---------------------------------------------------------
+                    // [KETENTUAN c.ii.2] Menampilkan Judul TV Show
+                    // ---------------------------------------------------------
                     Text(
                       currentFilm.name,
                       style: const TextStyle(
@@ -74,7 +97,9 @@ class _DetailPageState extends State<DetailPage> {
                     ),
                     const SizedBox(height: 8),
 
-                    // Rating
+                    // ---------------------------------------------------------
+                    // [KETENTUAN c.ii.3] Menampilkan Rating
+                    // ---------------------------------------------------------
                     Row(
                       children: [
                         const Icon(Icons.star, color: Colors.amber, size: 18),
@@ -91,7 +116,9 @@ class _DetailPageState extends State<DetailPage> {
                     ),
                     const SizedBox(height: 6),
 
-                    // Genre
+                    // ---------------------------------------------------------
+                    // [KETENTUAN c.ii.4] Menampilkan Genre
+                    // ---------------------------------------------------------
                     if (currentFilm.genres.isNotEmpty)
                       Text(
                         currentFilm.genres.join(', '),
@@ -99,9 +126,10 @@ class _DetailPageState extends State<DetailPage> {
                       ),
                     const SizedBox(height: 18),
 
-                    // Tombol Nonton & Tombol Favorit
+                    // Baris Tombol Aksi: Tombol Nonton & Tombol Favorit
                     Row(
                       children: [
+                        // Tombol Nonton (simulasi pemutaran film)
                         Expanded(
                           child: ElevatedButton.icon(
                             onPressed: () {
@@ -112,16 +140,27 @@ class _DetailPageState extends State<DetailPage> {
                             icon: const Icon(Icons.play_arrow, color: Colors.white),
                             label: const Text(
                               'Nonton',
-                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
                             ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFFE50914),
                               padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
                             ),
                           ),
                         ),
                         const SizedBox(width: 12),
+
+                        // -----------------------------------------------------
+                        // [KETENTUAN c.iii] Tombol Favorit (Toggle)
+                        // Menambahkan atau menghapus film dari daftar favorit Hive
+                        // -----------------------------------------------------
                         Container(
                           decoration: BoxDecoration(
                             color: const Color(0xFF1E1E1E),
@@ -137,7 +176,11 @@ class _DetailPageState extends State<DetailPage> {
                               controller.toggleFavorite(currentFilm);
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text(isFav ? 'Dihapus dari favorit' : 'Ditambahkan ke favorit'),
+                                  content: Text(
+                                    isFav
+                                        ? 'Dihapus dari favorit'
+                                        : 'Ditambahkan ke favorit',
+                                  ),
                                   duration: const Duration(seconds: 1),
                                 ),
                               );
@@ -148,15 +191,26 @@ class _DetailPageState extends State<DetailPage> {
                     ),
                     const SizedBox(height: 24),
 
-                    // Overview
+                    // ---------------------------------------------------------
+                    // [KETENTUAN c.ii.5] Menampilkan Summary / Overview
+                    // Menggunakan cleanSummary untuk menghilangkan tag HTML API
+                    // ---------------------------------------------------------
                     const Text(
                       'Overview',
-                      style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       currentFilm.cleanSummary,
-                      style: TextStyle(color: Colors.grey.shade300, fontSize: 14, height: 1.5),
+                      style: TextStyle(
+                        color: Colors.grey.shade300,
+                        fontSize: 14,
+                        height: 1.5,
+                      ),
                     ),
                   ],
                 ),

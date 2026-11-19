@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:latres/controllers/login_controller.dart';
 
+// =============================================================================
+// [KETENTUAN e. PROFILE PAGE]
+// Menampilkan informasi username dari SharedPreferences, kesan & pesan praktikum,
+// serta tombol logout fungsional.
+// =============================================================================
+
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
@@ -16,6 +22,9 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
+    // -------------------------------------------------------------------------
+    // [KETENTUAN e.i] Memuat Username dari SharedPreferences saat Halaman Dibuka
+    // -------------------------------------------------------------------------
     _loadUsername();
   }
 
@@ -26,12 +35,24 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 
+  // ---------------------------------------------------------------------------
+  // [KETENTUAN a.iii & e.iii] Logika Tombol Logout Fungsional
+  // Menghapus data sesi di SharedPreferences dan kembali ke LoginPage
+  // ---------------------------------------------------------------------------
+  void _handleLogout() async {
+    await _loginController.logout();
+    Get.offAllNamed('/login'); // Menghapus seluruh stack rute dan menuju ke /login
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF141414),
       appBar: AppBar(
-        title: const Text('Profil', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Profil',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
         backgroundColor: const Color(0xFF141414),
         elevation: 0,
         automaticallyImplyLeading: false,
@@ -42,7 +63,7 @@ class _ProfilePageState extends State<ProfilePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Avatar
+              // Avatar Pengguna
               const CircleAvatar(
                 radius: 50,
                 backgroundColor: Color(0xFF333333),
@@ -50,14 +71,22 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               const SizedBox(height: 16),
 
-              // Username dari SharedPreferences
+              // ---------------------------------------------------------------
+              // [KETENTUAN e.i] Menampilkan Username dari SharedPreferences
+              // ---------------------------------------------------------------
               Text(
                 _username,
-                style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 24),
 
-              // Kesan dan Pesan
+              // ---------------------------------------------------------------
+              // [KETENTUAN e.ii] Menampilkan Kesan dan Pesan Praktikum
+              // ---------------------------------------------------------------
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
@@ -67,28 +96,42 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 child: Column(
                   children: [
-                    Text('Kesan: oke', style: TextStyle(color: Colors.grey.shade300, fontSize: 14)),
+                    Text(
+                      'Kesan: oke',
+                      style: TextStyle(color: Colors.grey.shade300, fontSize: 14),
+                    ),
                     const SizedBox(height: 8),
-                    Text('Pesan: oke', style: TextStyle(color: Colors.grey.shade300, fontSize: 14)),
+                    Text(
+                      'Pesan: oke',
+                      style: TextStyle(color: Colors.grey.shade300, fontSize: 14),
+                    ),
                   ],
                 ),
               ),
               const SizedBox(height: 36),
 
-              // Tombol Logout
+              // ---------------------------------------------------------------
+              // [KETENTUAN a.iii & e.iii] Tombol Logout yang Functional
+              // ---------------------------------------------------------------
               SizedBox(
                 width: double.infinity,
                 height: 48,
                 child: ElevatedButton(
-                  onPressed: () async {
-                    await _loginController.logout();
-                    Get.offAllNamed('/login');
-                  },
+                  onPressed: _handleLogout,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFE50914),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                    backgroundColor: const Color(0xFFE50914), // Merah Netflix
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
                   ),
-                  child: const Text('Logout', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    'Logout',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
             ],
